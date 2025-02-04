@@ -181,11 +181,17 @@ int main() {
         }
 
         // Configuration du texte à afficher
-        sf::Text text(font);
-        text.setString(std::to_string(scoreJ1) + " | " + std::to_string(scoreJ2));
-        text.setCharacterSize(24);
-        text.setFillColor(sf::Color::White);
-        text.setPosition({ WIN_WIDTH / 2, 10});
+        sf::Text text_ScoreJ1(font);
+        text_ScoreJ1.setString(std::to_string(scoreJ1));
+        text_ScoreJ1.setCharacterSize(50);
+        text_ScoreJ1.setFillColor(sf::Color::White);
+        text_ScoreJ1.setPosition({ (WIN_WIDTH / 2) - 50 - 35, 10});
+
+        sf::Text text_ScoreJ2(font);
+        text_ScoreJ2.setString(std::to_string(scoreJ2));
+        text_ScoreJ2.setCharacterSize(50);
+        text_ScoreJ2.setFillColor(sf::Color::White);
+        text_ScoreJ2.setPosition({ (WIN_WIDTH / 2) + 35, 10 });
 
         // Préparation des formes
         // Balle
@@ -199,6 +205,10 @@ int main() {
         // Raquette droite
         sf::RectangleShape rectangleshape2(sf::Vector2f(raquettesWidth, raquettesHeight));
         rectangleshape2.setPosition(sf::Vector2f(posRaquettesRightX, posRaquettesRightY));
+
+        // Trait du millieu
+        sf::RectangleShape rectangleshape_TraitMillieu(sf::Vector2f(7, WIN_HEIGHT));
+        rectangleshape_TraitMillieu.setPosition(sf::Vector2f((WIN_WIDTH / 2) - 7, 0));
 
         // Boucle principale de la fenêtre SFML
         while (window.isOpen() && running) {
@@ -224,13 +234,16 @@ int main() {
             UpdateBall();
 
             // Texte du score
-            text.setString(std::to_string(scoreJ1) + " | " + std::to_string(scoreJ2));
+            text_ScoreJ1.setString(std::to_string(scoreJ1));
+            text_ScoreJ2.setString(std::to_string(scoreJ2));
 
             window.clear(sf::Color::Black);
-            window.draw(text);
+            window.draw(text_ScoreJ1);
+            window.draw(text_ScoreJ2);
             window.draw(circleShape);
             window.draw(rectangleshape);
             window.draw(rectangleshape2);
+            window.draw(rectangleshape_TraitMillieu);
             window.display();
         }
 
