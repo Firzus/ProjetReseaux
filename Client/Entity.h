@@ -22,6 +22,7 @@ public:
 	sf::RectangleShape GetShape();
 	void SetString(const std:: string& textstring);
 	void Draw(sf::RenderWindow& window);
+	virtual void onDraw(sf::RenderWindow& window);
 	virtual void onInitialize();
 	
 private:

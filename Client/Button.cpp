@@ -7,6 +7,19 @@ bool Button::IsClicked(sf::Vector2f cursorPos)
     return bounds.contains(cursorPos);
 }
 
+void Button::onDraw(sf::RenderWindow& window)
+{
+    window.draw(m_text);
+}
+
+Button::Button(float posX, float posY, float width, float height, sf::Color color, sf::Color hoverColor, sf::Color clickColor, sf::Font font) : Entity(posX, posY, width, height, color), m_normalColor(color), m_hoverColor(hoverColor), m_clickColor(clickColor), m_text(font)
+{
+    m_text.setString("ButtonTest");
+    m_text.setCharacterSize(24);
+    m_text.setFillColor(sf::Color::Red);
+    m_text.setPosition({posX, posY});
+}
+
 void Button::onUpdate(sf::RenderWindow& window)
 {
     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
@@ -36,5 +49,6 @@ void Button::onUpdate(sf::RenderWindow& window)
         m_isClicked = false;
         m_shape.setFillColor(m_hoverColor); // Retour à la couleur de survol
     }
+
 }
 

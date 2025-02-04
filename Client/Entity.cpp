@@ -37,7 +37,12 @@ void Entity::SetString(const std::string& textstring)
 void Entity::Draw(sf::RenderWindow& window)
 {
     window.draw(m_shape);
+    onDraw(window);
     //window.draw(m_text);
+}
+
+void Entity::onDraw(sf::RenderWindow& window)
+{
 }
 
 void Entity::onInitialize()
