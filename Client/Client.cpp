@@ -45,6 +45,7 @@ float raquettesHeight = 150.0f;
 float raquettesWidth = 20.0f;
 
 // Info Balle
+int ballRadius = 15;
 float ballSpeed = 0.03;
 sf::Vector2f ballDir = sf::Vector2f(2.0f, 0.5f);
 float ballPosX = WIN_WIDTH / 2;
@@ -83,8 +84,6 @@ void CheckBtn()
         if (posRaquettesRightY + raquettesHeight > WIN_HEIGHT)
             posRaquettesRightY = WIN_HEIGHT - raquettesHeight;
     }
-
-
 }
 
 void UpdateBall()
@@ -94,15 +93,15 @@ void UpdateBall()
     ballPosY += ballDir.y * ballSpeed;
     // Collision balle
     // raquette gauche ou droite touchée ?
-    if ((ballPosX < posRaquettesLeftX + raquettesWidth &&
-        ballPosX > posRaquettesLeftX &&
-        ballPosY < posRaquettesLeftY + raquettesHeight &&
-        ballPosY > posRaquettesLeftY)
+    if ((ballPosX - ballRadius < posRaquettesLeftX + raquettesWidth &&
+        ballPosX + ballRadius > posRaquettesLeftX &&
+        ballPosY - ballRadius < posRaquettesLeftY + raquettesHeight &&
+        ballPosY + ballRadius > posRaquettesLeftY)
         ||
-        (ballPosX > posRaquettesRightX - raquettesWidth &&
-            ballPosX < posRaquettesRightX &&
-            ballPosY < posRaquettesRightY + raquettesHeight &&
-            ballPosY > posRaquettesRightY)) 
+        (ballPosX + ballRadius > posRaquettesRightX - raquettesWidth &&
+            ballPosX - ballRadius < posRaquettesRightX &&
+            ballPosY - ballRadius < posRaquettesRightY + raquettesHeight &&
+            ballPosY + ballRadius> posRaquettesRightY))
     {
         ballDir.x *= -1;
     }
@@ -117,7 +116,7 @@ void UpdateBall()
         ballDir.y *= -1;
     }
     // hit mur droit
-    if (ballPosX > WIN_WIDTH)
+    if (ballPosX + ballRadius > WIN_WIDTH)
     {
         scoreJ1++;
         ballPosX = WIN_WIDTH / 2;
@@ -127,7 +126,7 @@ void UpdateBall()
     }
 
     // mur haut ou bas
-    if (ballPosY > WIN_HEIGHT || ballPosY < 0) {
+    if (ballPosY + ballRadius > WIN_HEIGHT || ballPosY - ballRadius < 0) {
         ballDir.y *= -1;
     }
 
@@ -195,7 +194,7 @@ int main() {
 
         // Préparation des formes
         // Balle
-        sf::CircleShape circleShape(15);
+        sf::CircleShape circleShape(ballRadius);
         circleShape.setPosition(sf::Vector2f(ballPosX, ballPosY));
 
         // Raquette gauche
