@@ -21,6 +21,7 @@ void Button::onUpdate(sf::RenderWindow& window)
         {
             m_isClicked = true;
             m_shape.setFillColor(m_clickColor); // Change la couleur au clic
+            
         }
     }
     else

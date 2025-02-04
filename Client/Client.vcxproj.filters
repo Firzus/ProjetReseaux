@@ -24,11 +24,14 @@
     <ClCompile Include="Button.cpp">
       <Filter>Fichiers sources\SFML</Filter>
     </ClCompile>
-    <ClCompile Include="client.cpp">
+    <ClCompile Include="TextEntry.cpp">
       <Filter>Fichiers sources\SFML</Filter>
     </ClCompile>
-    <ClCompile Include="TextEntry.cpp">
+    <ClCompile Include="client.cpp">
       <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Text.cpp">
+      <Filter>Fichiers sources\SFML</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -39,7 +42,10 @@
       <Filter>Fichiers sources\SFML</Filter>
     </ClInclude>
     <ClInclude Include="TextEntry.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers sources\SFML</Filter>
+    </ClInclude>
+    <ClInclude Include="Text.h">
+      <Filter>Fichiers sources\SFML</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

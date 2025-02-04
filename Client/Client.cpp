@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include "Button.h"
 #include "TextEntry.h"
+#include "Text.h"
 
 #pragma comment(lib, "ws2_32.lib") // Lier la bibliothèque Winsock
 
@@ -105,7 +106,8 @@ int main() {
     //Interface UI
     Button button (100, 200, 300, 100, sf::Color::White);
     Button button2(600, 200, 300, 100, sf::Color::White);
-    TextEntry entry(font,24, {0,0});
+    TextEntry entry(font, 24, { 100,500 }, true);
+    Text statut(font, 24, { 100, 600 });
 
     // Boucle principale de la fenêtre SFML
 // Boucle principale de la fenêtre SFML
@@ -116,6 +118,14 @@ int main() {
                 window.close();
                 running = false;
             }
+
+            if (event->is<sf::Event::TextEntered>()) 
+            {
+                entry.TypedOn(event);
+            }
+
+            
+
         }
 
         // Mettre à jour les boutons
@@ -128,6 +138,8 @@ int main() {
         window.draw(text);  // Affiche le texte
         button.Draw(window); // Affiche le bouton 1
         button2.Draw(window); // Affiche le bouton 2
+        statut.draw(window);
+        entry.draw(window);
         window.display();
     }
 
