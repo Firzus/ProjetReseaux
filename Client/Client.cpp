@@ -3,13 +3,21 @@
 #include <ws2tcpip.h>
 #include <iostream>
 #include <thread>
-#include <cstring>
 #include <SFML/Graphics.hpp>
+#include <sstream>
+#include <chrono>
 
-#pragma comment(lib, "ws2_32.lib") // Lier la bibliothèque Winsock
+#pragma comment(lib, "ws2_32.lib")
 
 // Variable globale pour contrôler la boucle d'exécution
 bool running = true;
+sf::Vector2f currentPosition(400.f, 300.f); // Position actuelle de la balle
+sf::Vector2f targetPosition = currentPosition;
+float interpolationSpeed = 0.1f;
+
+sf::Vector2f lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t) {
+    return start + t * (end - start);
+}
 
 // Fonction exécutée dans un thread dédié pour recevoir les messages du serveur
 void networkListener(SOCKET sock) {
@@ -20,15 +28,15 @@ void networkListener(SOCKET sock) {
         ZeroMemory(buffer, bufferSize);
         int bytesReceived = recv(sock, buffer, bufferSize, 0);
         if (bytesReceived > 0) {
-            std::cout << "Message reçu du serveur : " << buffer << std::endl;
-        }
-        else if (bytesReceived == 0) {
-            std::cout << "Connexion fermée par le serveur." << std::endl;
-            running = false;
-            break;
+            std::istringstream dataStream(buffer);
+            float x, y;
+            char comma;
+            if (dataStream >> x >> comma >> y) {
+                targetPosition = sf::Vector2f(x, y); // Nouvelle position cible
+                std::cout << "Nouvelle position reçue : (" << x << ", " << y << ")\n";
+            }
         }
         else {
-            std::cerr << "Erreur de réception : " << WSAGetLastError() << std::endl;
             running = false;
             break;
         }
@@ -72,15 +80,6 @@ int main() {
 
     std::cout << "Connecté au serveur." << std::endl;
 
-    // Envoi d'un message au serveur
-    const char* message = "Hello from SFML client!";
-    if (send(sock, message, static_cast<int>(strlen(message)), 0) == SOCKET_ERROR) {
-        std::cerr << "Erreur lors de l'envoi du message : " << WSAGetLastError() << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return 1;
-    }
-
     // Lancement d'un thread pour écouter les messages du serveur
     std::thread networkThread(networkListener, sock);
 
@@ -99,6 +98,13 @@ int main() {
     text.setFillColor(sf::Color::White);
     text.setPosition({ 50.f, 50.f });
 
+    // Ball test
+    sf::CircleShape ball(10.f);
+    ball.setFillColor(sf::Color::Red);
+    ball.setPosition(currentPosition);
+
+    auto lastTime = std::chrono::high_resolution_clock::now();
+
     // Boucle principale de la fenêtre SFML
     while (window.isOpen() && running) {
         while (const std::optional event = window.pollEvent())
@@ -109,7 +115,14 @@ int main() {
             }
         }
 
+        // Interpolation de la position
+        currentPosition = lerp(currentPosition, targetPosition, interpolationSpeed);
+
+        // Mise à jour de l'affichage
+        ball.setPosition(currentPosition);
+
         window.clear(sf::Color::Black);
+        window.draw(ball);
         window.draw(text);
         window.display();
     }

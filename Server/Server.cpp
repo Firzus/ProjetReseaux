@@ -3,28 +3,27 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include <cstring> // Pour strlen
+#include <random>
+#include <chrono>
+#include <string>
 
 #pragma comment(lib, "ws2_32.lib")
 
 // Fonction qui gère la communication avec un client
+
 void handleClient(SOCKET clientSocket) {
-    const int bufferSize = 4096;
-    char buffer[bufferSize];
+    std::mt19937 rng(std::random_device{}());
+    std::uniform_real_distribution<float> distX(0.f, 800.f);
+    std::uniform_real_distribution<float> distY(0.f, 600.f);
 
     while (true) {
-        ZeroMemory(buffer, bufferSize);
-        int bytesReceived = recv(clientSocket, buffer, bufferSize, 0);
-        if (bytesReceived <= 0) {
-            std::cout << "Client déconnecté." << std::endl;
-            break;
-        }
+        float x = distX(rng);
+        float y = distY(rng);
 
-        std::cout << "Message reçu : " << buffer << std::endl;
+        std::string positionMessage = std::to_string(x) + "," + std::to_string(y);
+        send(clientSocket, positionMessage.c_str(), static_cast<int>(positionMessage.size()), 0);
 
-        // Par exemple, renvoyer une réponse au client
-        const char* reply = "Message reçu!";
-        send(clientSocket, reply, static_cast<int>(strlen(reply)), 0);
+        std::this_thread::sleep_for(std::chrono::seconds(2)); // Envoi toutes les 2 secondes
     }
 
     closesocket(clientSocket);
