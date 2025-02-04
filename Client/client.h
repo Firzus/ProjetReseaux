@@ -16,3 +16,4 @@ const int WIN_HEIGHT = 600;
 
 // Prototypes
 void CheckBtn();
+void UpdateBall();

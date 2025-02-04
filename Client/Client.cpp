@@ -45,8 +45,8 @@ float raquettesHeight = 150.0f;
 float raquettesWidth = 20.0f;
 
 // Info Balle
-float ballspeed = 2;
-sf::Vector2f ballDir = sf::Vector2f(1.5f, 2);
+float ballSpeed = 0.03;
+sf::Vector2f ballDir = sf::Vector2f(2.0f, 0.5f);
 float ballPosX = WIN_WIDTH / 2;
 float ballPosY = WIN_HEIGHT / 2;
 
@@ -57,18 +57,80 @@ int scoreJ2 = 0;
 void CheckBtn()
 {
     // Raquette gauche
-    if (input.GetButton().up)
+    if (input.GetButton().Z)
     {
         posRaquettesLeftY -= raquettespeed;
         if (posRaquettesLeftY < 0)
             posRaquettesLeftY = 0;
     }
-    if (input.GetButton().down)
+    if (input.GetButton().S)
     {
         posRaquettesLeftY += raquettespeed;
         if (posRaquettesLeftY + raquettesHeight > WIN_HEIGHT)
             posRaquettesLeftY = WIN_HEIGHT - raquettesHeight;
     }
+
+    // Raquette droit
+    if (input.GetButton().up)
+    {
+        posRaquettesRightY -= raquettespeed;
+        if (posRaquettesRightY < 0)
+            posRaquettesRightY = 0;
+    }
+    if (input.GetButton().down)
+    {
+        posRaquettesRightY += raquettespeed;
+        if (posRaquettesRightY + raquettesHeight > WIN_HEIGHT)
+            posRaquettesRightY = WIN_HEIGHT - raquettesHeight;
+    }
+
+
+}
+
+void UpdateBall()
+{
+    // Position de la balle
+    ballPosX += ballDir.x * ballSpeed;
+    ballPosY += ballDir.y * ballSpeed;
+    // Collision balle
+    // raquette gauche ou droite touchée ?
+    if ((ballPosX < posRaquettesLeftX + raquettesWidth &&
+        ballPosX > posRaquettesLeftX &&
+        ballPosY < posRaquettesLeftY + raquettesHeight &&
+        ballPosY > posRaquettesLeftY)
+        ||
+        (ballPosX > posRaquettesRightX - raquettesWidth &&
+            ballPosX < posRaquettesRightX &&
+            ballPosY < posRaquettesRightY + raquettesHeight &&
+            ballPosY > posRaquettesRightY)) 
+    {
+        ballDir.x *= -1;
+    }
+
+    // hit mur gauche
+    if (ballPosX < 0) 
+    {
+        scoreJ2++;
+        ballPosX = WIN_WIDTH / 2;
+        ballPosY = WIN_HEIGHT / 2;
+        ballDir.x = fabs(ballDir.x)*-1;
+        ballDir.y *= -1;
+    }
+    // hit mur droit
+    if (ballPosX > WIN_WIDTH)
+    {
+        scoreJ1++;
+        ballPosX = WIN_WIDTH / 2;
+        ballPosY = WIN_HEIGHT / 2;
+        ballDir.x = fabs(ballDir.x);
+        ballDir.y *= -1;
+    }
+
+    // mur haut ou bas
+    if (ballPosY > WIN_HEIGHT || ballPosY < 0) {
+        ballDir.y *= -1;
+    }
+
 }
 
 
@@ -152,12 +214,17 @@ int main() {
             }
             // Gestion clavier
             CheckBtn();
-            // Gestion raquettes, balle
+
+            // Gestion des shapes des raquettes, balle
             rectangleshape.setPosition(sf::Vector2f(posRaquettesLeftX, posRaquettesLeftY));
             rectangleshape2.setPosition(sf::Vector2f(posRaquettesRightX, posRaquettesRightY));
-
-            // Update Ball
             circleShape.setPosition(sf::Vector2f(ballPosX, ballPosY));
+
+            // Gestion de la balle
+            UpdateBall();
+
+            // Texte du score
+            text.setString(std::to_string(scoreJ1) + " | " + std::to_string(scoreJ2));
 
             window.clear(sf::Color::Black);
             window.draw(text);

@@ -8,7 +8,7 @@ class Input
 public:
     // Structure pour les états des boutons
     struct Button {
-        bool left, right, up, down, escape;
+        bool Z, S, up, down, escape;
     };
 
     // Constructeur
