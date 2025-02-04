@@ -1,12 +1,4 @@
-// Client.cpp
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <iostream>
-#include <thread>
-#include <cstring>
-#include <SFML/Graphics.hpp>
-
-#pragma comment(lib, "ws2_32.lib") // Lier la bibliothèque Winsock
+#include "client.h"
 
 // Variable globale pour contrôler la boucle d'exécution
 bool running = true;
@@ -35,93 +27,171 @@ void networkListener(SOCKET sock) {
     }
 }
 
+sf::RenderWindow window;
+Input input;
+sf::Font font;
+
+// Pos raquettes Left
+float posRaquettesLeftX = 50.0f;
+float posRaquettesLeftY = WIN_HEIGHT / 2;
+
+// Pos raquettes Right
+float posRaquettesRightX = WIN_WIDTH - 70;
+float posRaquettesRightY = posRaquettesLeftY;
+
+// Raquettes parameters
+float raquettespeed = 0.07f;
+float raquettesHeight = 150.0f;
+float raquettesWidth = 20.0f;
+
+// Info Balle
+float ballspeed = 2;
+sf::Vector2f ballDir = sf::Vector2f(1.5f, 2);
+float ballPosX = WIN_WIDTH / 2;
+float ballPosY = WIN_HEIGHT / 2;
+
+// Score
+int scoreJ1 = 0;
+int scoreJ2 = 0;
+
+void CheckBtn()
+{
+    // Raquette gauche
+    if (input.GetButton().up)
+    {
+        posRaquettesLeftY -= raquettespeed;
+        if (posRaquettesLeftY < 0)
+            posRaquettesLeftY = 0;
+    }
+    if (input.GetButton().down)
+    {
+        posRaquettesLeftY += raquettespeed;
+        if (posRaquettesLeftY + raquettesHeight > WIN_HEIGHT)
+            posRaquettesLeftY = WIN_HEIGHT - raquettesHeight;
+    }
+}
+
+
 int main() {
     // Initialisation de Winsock
     WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        std::cerr << "Erreur WSAStartup" << std::endl;
-        return 1;
-    }
-
-    // Création du socket TCP/IP
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (sock == INVALID_SOCKET) {
-        std::cerr << "Erreur de création du socket : " << WSAGetLastError() << std::endl;
-        WSACleanup();
-        return 1;
-    }
-
-    // Configuration de l'adresse du serveur
-    sockaddr_in serverAddr;
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(3000);  // Port 3000
-    if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
-        std::cerr << "Adresse IP invalide" << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return 1;
-    }
-
-    // Connexion au serveur
-    if (connect(sock, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
-        std::cerr << "Erreur de connexion : " << WSAGetLastError() << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return 1;
-    }
-
-    std::cout << "Connecté au serveur." << std::endl;
-
-    // Envoi d'un message au serveur
-    const char* message = "Hello from SFML client!";
-    if (send(sock, message, static_cast<int>(strlen(message)), 0) == SOCKET_ERROR) {
-        std::cerr << "Erreur lors de l'envoi du message : " << WSAGetLastError() << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return 1;
-    }
-
-    // Lancement d'un thread pour écouter les messages du serveur
-    std::thread networkThread(networkListener, sock);
-
-    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Client SFML - Communication Réseau");
-
-    // Chargement d'une police pour afficher un texte
-    sf::Font font;
-    if (!font.openFromFile("resources/font/Roboto.ttf")) {
-        std::cerr << "Erreur de chargement de la police." << std::endl;
-    }
-
-    // Configuration du texte à afficher
-    sf::Text text(font);
-    text.setString("Client SFML : Connecté au serveur sur le port 3000");
-    text.setCharacterSize(24);
-    text.setFillColor(sf::Color::White);
-    text.setPosition({ 50.f, 50.f });
-
-    // Boucle principale de la fenêtre SFML
-    while (window.isOpen() && running) {
-        while (const std::optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>()) {
-                window.close();
-                running = false;
-            }
+    try {
+        if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+            throw std::runtime_error("Erreur WSAStartup");
         }
 
-        window.clear(sf::Color::Black);
-        window.draw(text);
-        window.display();
+        // Création du socket TCP/IP
+        SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (sock == INVALID_SOCKET) {
+            throw std::runtime_error("Erreur de création du socket : " + std::to_string(WSAGetLastError()));
+        }
+
+        // Configuration de l'adresse du serveur
+        sockaddr_in serverAddr;
+        serverAddr.sin_family = AF_INET;
+        serverAddr.sin_port = htons(3000);  // Port 3000
+        if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
+            throw std::runtime_error("Adresse IP invalide");
+        }
+
+        // Connexion au serveur
+        if (connect(sock, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
+            throw std::runtime_error("Erreur de connexion : " + std::to_string(WSAGetLastError()));
+        }
+
+        std::cout << "Connecté au serveur." << std::endl;
+
+        // Envoi d'un message au serveur
+        const char* message = "Hello from SFML client!";
+        if (send(sock, message, static_cast<int>(strlen(message)), 0) == SOCKET_ERROR) {
+            throw std::runtime_error("Erreur lors de l'envoi du message : " + std::to_string(WSAGetLastError()));
+        }
+
+        // Lancement d'un thread pour écouter les messages du serveur
+        std::thread networkThread(networkListener, sock);
+
+        // Création de la fenêtre SFML et gestion des exceptions SFML
+        sf::RenderWindow window(sf::VideoMode({ WIN_WIDTH, WIN_HEIGHT }), "Client SFML - Communication Réseau");
+
+        // Chargement de la police avec gestion des erreurs
+        if (!font.openFromFile("resources/font/Roboto.ttf")) {
+            throw std::runtime_error("Erreur de chargement de la police.");
+        }
+
+        // Configuration du texte à afficher
+        sf::Text text(font);
+        text.setString(std::to_string(scoreJ1) + " | " + std::to_string(scoreJ2));
+        text.setCharacterSize(24);
+        text.setFillColor(sf::Color::White);
+        text.setPosition({ WIN_WIDTH / 2, 10});
+
+        // Préparation des formes
+        // Balle
+        sf::CircleShape circleShape(15);
+        circleShape.setPosition(sf::Vector2f(ballPosX, ballPosY));
+
+        // Raquette gauche
+        sf::RectangleShape rectangleshape(sf::Vector2f(raquettesWidth, raquettesHeight));
+        rectangleshape.setPosition(sf::Vector2f(posRaquettesLeftX, posRaquettesLeftY));
+
+        // Raquette droite
+        sf::RectangleShape rectangleshape2(sf::Vector2f(raquettesWidth, raquettesHeight));
+        rectangleshape2.setPosition(sf::Vector2f(posRaquettesRightX, posRaquettesRightY));
+
+        // Boucle principale de la fenêtre SFML
+        while (window.isOpen() && running) {
+
+            while (const std::optional<sf::Event> event = window.pollEvent())
+            {
+                if (event->is<sf::Event::Closed>()) {
+                    window.close();
+                    running = false;
+                }
+
+                input.InputHandler(*event, window);
+            }
+            // Gestion clavier
+            CheckBtn();
+            // Gestion raquettes, balle
+            rectangleshape.setPosition(sf::Vector2f(posRaquettesLeftX, posRaquettesLeftY));
+            rectangleshape2.setPosition(sf::Vector2f(posRaquettesRightX, posRaquettesRightY));
+
+            // Update Ball
+            circleShape.setPosition(sf::Vector2f(ballPosX, ballPosY));
+
+            window.clear(sf::Color::Black);
+            window.draw(text);
+            window.draw(circleShape);
+            window.draw(rectangleshape);
+            window.draw(rectangleshape2);
+            window.display();
+        }
+
+        // Arrêt de l'écoute réseau
+        running = false;
+        if (networkThread.joinable())
+            networkThread.join();
+
+        // Fermeture du socket et nettoyage de Winsock
+        closesocket(sock);
+        WSACleanup();
+
     }
-
-    // Arrêt de l'écoute réseau
-    running = false;
-    if (networkThread.joinable())
-        networkThread.join();
-
-    // Fermeture du socket et nettoyage de Winsock
-    closesocket(sock);
-    WSACleanup();
+    catch (const std::runtime_error& e) {
+        std::cerr << "Exception standard: " << e.what() << std::endl;
+        running = false;
+        WSACleanup();
+    }
+    catch (const sf::Exception& e) {
+        std::cerr << "Exception SFML: " << e.what() << std::endl;
+        running = false;
+        WSACleanup();
+    }
+    catch (...) {
+        std::cerr << "Une erreur inconnue est survenue." << std::endl;
+        running = false;
+        WSACleanup();
+    }
 
     return 0;
 }
