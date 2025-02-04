@@ -5,6 +5,8 @@
 #include <thread>
 #include <cstring>
 #include <SFML/Graphics.hpp>
+#include "Button.h"
+#include "TextEntry.h"
 
 #pragma comment(lib, "ws2_32.lib") // Lier la bibliothèque Winsock
 
@@ -36,6 +38,7 @@ void networkListener(SOCKET sock) {
 }
 
 int main() {
+
     // Initialisation de Winsock
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -84,7 +87,7 @@ int main() {
     // Lancement d'un thread pour écouter les messages du serveur
     std::thread networkThread(networkListener, sock);
 
-    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Client SFML - Communication Réseau");
+    sf::RenderWindow window(sf::VideoMode({ 1080, 720 }), "Client SFML - Communication Réseau");
 
     // Chargement d'une police pour afficher un texte
     sf::Font font;
@@ -99,7 +102,13 @@ int main() {
     text.setFillColor(sf::Color::White);
     text.setPosition({ 50.f, 50.f });
 
+    //Interface UI
+    Button button (100, 200, 300, 100, sf::Color::White);
+    Button button2(600, 200, 300, 100, sf::Color::White);
+    TextEntry entry(font,24, {0,0});
+
     // Boucle principale de la fenêtre SFML
+// Boucle principale de la fenêtre SFML
     while (window.isOpen() && running) {
         while (const std::optional event = window.pollEvent())
         {
@@ -109,10 +118,19 @@ int main() {
             }
         }
 
+        // Mettre à jour les boutons
+        button.onUpdate(window);
+        button2.onUpdate(window);
+
+        // Dessiner la fenêtre
         window.clear(sf::Color::Black);
-        window.draw(text);
+
+        window.draw(text);  // Affiche le texte
+        button.Draw(window); // Affiche le bouton 1
+        button2.Draw(window); // Affiche le bouton 2
         window.display();
     }
+
 
     // Arrêt de l'écoute réseau
     running = false;

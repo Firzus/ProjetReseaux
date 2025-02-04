@@ -1,0 +1,39 @@
+#include "Button.h"
+
+// Vérifie si le bouton est cliqué
+bool Button::IsClicked(sf::Vector2f cursorPos)
+{
+    sf::FloatRect bounds = m_shape.getGlobalBounds();
+    return bounds.contains(cursorPos);
+}
+
+void Button::onUpdate(sf::RenderWindow& window)
+{
+    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+    sf::Vector2f cursorPos = window.mapPixelToCoords(mousePos);
+
+    // Vérifie si la souris est au-dessus du bouton
+    if (IsClicked(cursorPos))
+    {
+        m_shape.setFillColor(m_hoverColor);  // Couleur survolée
+
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && !m_isClicked)
+        {
+            m_isClicked = true;
+            m_shape.setFillColor(m_clickColor); // Change la couleur au clic
+        }
+    }
+    else
+    {
+        if (!m_isClicked)
+            m_shape.setFillColor(m_normalColor); // Retour à la couleur normale
+    }
+
+    // Réinitialise l'état du bouton quand le clic est relâché
+    if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && m_isClicked)
+    {
+        m_isClicked = false;
+        m_shape.setFillColor(m_hoverColor); // Retour à la couleur de survol
+    }
+}
+
