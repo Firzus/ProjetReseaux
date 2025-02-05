@@ -23,6 +23,9 @@ public :
 	void CheckBtn();
 	void UpdateBall();
 
+	sf::RenderWindow& GetWindow();
+	Input& GetInput();
+
 private :
 	sf::RenderWindow window;
 	Input input;
@@ -50,7 +53,7 @@ private :
 	float raquettesWidth;
 
 	// Info Balle
-	int ballRadius;
+	float ballRadius;
 	float ballSpeed;
 	sf::Vector2f ballDir;
 	float ballPosX;

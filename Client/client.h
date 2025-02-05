@@ -6,14 +6,7 @@
 #include <cstring>
 #include "input.h"
 #include <SFML/Graphics.hpp>
+#include "Game.h"
 
 
 #pragma comment(lib, "ws2_32.lib") // Lier la bibliothèque Winsock
-
-// Constante
-const int WIN_WIDTH = 800;
-const int WIN_HEIGHT = 600;
-
-// Prototypes
-void CheckBtn();
-void UpdateBall();

@@ -9,13 +9,15 @@ Game::Game() :
     raquettesHeight(150.0f),
     raquettesWidth(20.0f),
     ballRadius(15),
-    ballSpeed(0.03),
+    ballSpeed(0.03f),
     ballDir(sf::Vector2f(2.0f, 0.5f)),
     ballPosX(WIN_WIDTH / 2),
     ballPosY(WIN_HEIGHT / 2),
     scoreJ1(0),
     scoreJ2(0),
     window(sf::VideoMode({ WIN_WIDTH, WIN_HEIGHT }), "Client SFML - Communication Réseau"),
+    text_ScoreJ1(font),
+    text_ScoreJ2(font)
 {}
 
 Game::~Game()
@@ -62,18 +64,6 @@ void Game::Initialize()
 
 void Game::Update(bool running)
 {
-    // Boucle principale de la fenêtre SFML
-    while (window.isOpen() && running) {
-
-        while (const std::optional<sf::Event> event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>()) {
-                window.close();
-                running = false;
-            }
-
-            input.InputHandler(*event, window);
-        }
         // Gestion clavier
         CheckBtn();
 
@@ -97,7 +87,6 @@ void Game::Update(bool running)
         window.draw(rectangleshape_J2);
         window.draw(rectangleshape_TraitMillieu);
         window.display();
-    }
 }
 
 void Game::CheckBtn()
@@ -175,5 +164,15 @@ void Game::UpdateBall()
         ballDir.y *= -1;
     }
 
+}
+
+sf::RenderWindow& Game::GetWindow()
+{
+    return window;
+}
+
+Input& Game::GetInput()
+{
+    return input;
 }
 
