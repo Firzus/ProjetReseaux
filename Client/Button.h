@@ -1,24 +1,29 @@
-#pragma once
-#include "Entity.h"
-class Button : public Entity
-{
-private:
-    sf::Color m_hoverColor;
-    sf::Color m_clickColor;
-    sf::Color m_normalColor;
+#ifndef BUTTON_H
+#define BUTTON_H
 
-    bool m_isClicked = false;
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <functional>
 
-    sf::Text m_text;
-
+class Button {
 public:
-    Button(float posX, float posY, float width, float height, sf::Color color, sf::Color hoverColor = sf::Color::Green, sf::Color clickColor = sf::Color::Red, sf::Font font);
-        
+    enum class State { Normal, Hovered, Pressed };
 
-    void onUpdate(sf::RenderWindow& window);
+    Button(const std::string& text, sf::Vector2f position, sf::Vector2f size, sf::Font& font);
 
-    bool IsClicked(sf::Vector2f cursorPos); // Vérifie si le bouton est cliqué
+    void draw(sf::RenderWindow& window);
+    void update(const sf::Vector2f& mousePos, const sf::Event& event);
+    bool isHovered(const sf::Vector2f& mousePos) const;
+    bool isClicked(const sf::Vector2f& mousePos, const sf::Event& event) const;
+    void setCallback(std::function<void()> callback) { m_callback = callback; }
 
-    void onDraw(sf::RenderWindow& window) override;
+private:
+    sf::RectangleShape m_shape;
+    sf::Text m_label;
+    State m_state = State::Normal;
+    std::function<void()> m_callback;
+
+    void updateColor(); // Met à jour la couleur du bouton
 };
 
+#endif

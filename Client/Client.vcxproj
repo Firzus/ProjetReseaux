@@ -145,14 +145,12 @@
   <ItemGroup>
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="client.cpp" />
-    <ClCompile Include="Entity.cpp" />
-    <ClCompile Include="Text.cpp" />
+    <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="TextEntry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h" />
-    <ClInclude Include="Entity.h" />
-    <ClInclude Include="Text.h" />
+    <ClInclude Include="TextBox.h" />
     <ClInclude Include="TextEntry.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

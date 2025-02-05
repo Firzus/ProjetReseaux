@@ -6,8 +6,7 @@
 #include <cstring>
 #include <SFML/Graphics.hpp>
 #include "Button.h"
-#include "TextEntry.h"
-#include "Text.h"
+#include "TextBox.h"
 
 #pragma comment(lib, "ws2_32.lib") // Lier la bibliothèque Winsock
 
@@ -39,7 +38,6 @@ void networkListener(SOCKET sock) {
 }
 
 int main() {
-
     // Initialisation de Winsock
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -88,7 +86,7 @@ int main() {
     // Lancement d'un thread pour écouter les messages du serveur
     std::thread networkThread(networkListener, sock);
 
-    sf::RenderWindow window(sf::VideoMode({ 1080, 720 }), "Client SFML - Communication Réseau");
+    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Client SFML - Communication Réseau");
 
     // Chargement d'une police pour afficher un texte
     sf::Font font;
@@ -103,14 +101,18 @@ int main() {
     text.setFillColor(sf::Color::White);
     text.setPosition({ 50.f, 50.f });
 
-    //Interface UI
-    Button button (100, 200, 300, 100, sf::Color::White);
-    Button button2(600, 200, 300, 100, sf::Color::White);
-    TextEntry entry(font, 24, { 100,500 }, true);
-    Text statut(font, 24, { 100, 600 });
+    //UI
+    Button myButton("Host", { 100, 500 }, { 200, 50 }, font);
+    Button myButton2("Client", { 400, 500 }, { 200, 50 }, font);
+    TextBox textbox({ 100, 150 }, { 300, 50 }, font, "Pseudo: ");
+    TextBox textbox2({ 100, 200 }, { 300, 50 }, font, "Adresse IP: ");
+
+    // Définition du callback
+    myButton.setCallback([]() {
+        std::cout << "Button clicked!" << std::endl;
+        });
 
     // Boucle principale de la fenêtre SFML
-// Boucle principale de la fenêtre SFML
     while (window.isOpen() && running) {
         while (const std::optional event = window.pollEvent())
         {
@@ -119,30 +121,28 @@ int main() {
                 running = false;
             }
 
-            if (event->is<sf::Event::TextEntered>()) 
-            {
-                entry.TypedOn(event);
-            }
-
+            // Gestion du clic sur le bouton
             
-
+            sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+            
+            myButton.update(mousePos, *event);
+            myButton2.update(mousePos, *event);
+            textbox.handleEvent(*event, mousePos);
+            textbox2.handleEvent(*event, mousePos);
         }
+        sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        textbox.updateState(mousePos);
+        textbox2.updateState(mousePos);
 
-        // Mettre à jour les boutons
-        button.onUpdate(window);
-        button2.onUpdate(window);
 
-        // Dessiner la fenêtre
         window.clear(sf::Color::Black);
-
-        window.draw(text);  // Affiche le texte
-        button.Draw(window); // Affiche le bouton 1
-        button2.Draw(window); // Affiche le bouton 2
-        statut.draw(window);
-        entry.draw(window);
+        window.draw(text);
+        myButton.draw(window);
+        myButton2.draw(window);
+        textbox.draw(window);
+        textbox2.draw(window);
         window.display();
     }
-
 
     // Arrêt de l'écoute réseau
     running = false;

@@ -1,54 +1,63 @@
 #include "Button.h"
 
-// Vérifie si le bouton est cliqué
-bool Button::IsClicked(sf::Vector2f cursorPos)
+Button::Button(const std::string& text, sf::Vector2f position, sf::Vector2f size, sf::Font& font) : m_label(font)
 {
-    sf::FloatRect bounds = m_shape.getGlobalBounds();
-    return bounds.contains(cursorPos);
+    m_shape.setSize(size);
+    m_shape.setPosition(position);
+    m_shape.setFillColor(sf::Color::Blue); // Couleur par défaut
+
+    m_label.setFont(font);
+    m_label.setString(text);
+    m_label.setCharacterSize(20);
+    m_label.setFillColor(sf::Color::White);
+    m_label.setPosition({ position.x + 10, position.y + 10 });
 }
 
-void Button::onDraw(sf::RenderWindow& window)
+void Button::update(const sf::Vector2f& mousePos, const sf::Event& event)
 {
-    window.draw(m_text);
-}
-
-Button::Button(float posX, float posY, float width, float height, sf::Color color, sf::Color hoverColor, sf::Color clickColor, sf::Font font) : Entity(posX, posY, width, height, color), m_normalColor(color), m_hoverColor(hoverColor), m_clickColor(clickColor), m_text(font)
-{
-    m_text.setString("ButtonTest");
-    m_text.setCharacterSize(24);
-    m_text.setFillColor(sf::Color::Red);
-    m_text.setPosition({posX, posY});
-}
-
-void Button::onUpdate(sf::RenderWindow& window)
-{
-    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-    sf::Vector2f cursorPos = window.mapPixelToCoords(mousePos);
-
-    // Vérifie si la souris est au-dessus du bouton
-    if (IsClicked(cursorPos))
-    {
-        m_shape.setFillColor(m_hoverColor);  // Couleur survolée
-
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && !m_isClicked)
-        {
-            m_isClicked = true;
-            m_shape.setFillColor(m_clickColor); // Change la couleur au clic
-            
+    if (isHovered(mousePos)) {
+        m_state = State::Hovered;
+        if (event.is<sf::Event::MouseButtonPressed>() && event.is<sf::Event::MouseLeft>()) {
+            m_state = State::Pressed;
+            if (m_callback) {
+                m_callback();
+            }
         }
     }
-    else
-    {
-        if (!m_isClicked)
-            m_shape.setFillColor(m_normalColor); // Retour à la couleur normale
+    else {
+        m_state = State::Normal;
     }
 
-    // Réinitialise l'état du bouton quand le clic est relâché
-    if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && m_isClicked)
-    {
-        m_isClicked = false;
-        m_shape.setFillColor(m_hoverColor); // Retour à la couleur de survol
-    }
-
+    updateColor(); // Change la couleur selon l'état
 }
 
+void Button::updateColor()
+{
+    switch (m_state) {
+    case State::Normal:
+        m_shape.setFillColor(sf::Color::Blue); // Couleur normale
+        break;
+    case State::Hovered:
+        m_shape.setFillColor(sf::Color::Green); // Couleur au survol
+        break;
+    case State::Pressed:
+        m_shape.setFillColor(sf::Color::Red); // Couleur en cliquant
+        break;
+    }
+}
+
+bool Button::isHovered(const sf::Vector2f& mousePos) const
+{
+    return m_shape.getGlobalBounds().contains(mousePos);
+}
+
+bool Button::isClicked(const sf::Vector2f& mousePos, const sf::Event& event) const
+{
+    return isHovered(mousePos) && event.is<sf::Event::MouseButtonPressed>() && event.is<sf::Event::MouseLeft>();
+}
+
+void Button::draw(sf::RenderWindow& window)
+{
+    window.draw(m_shape);
+    window.draw(m_label);
+}
