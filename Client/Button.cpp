@@ -15,7 +15,7 @@ Button::Button(const std::string& text, sf::Vector2f position, sf::Vector2f size
 
 void Button::update(const sf::Vector2f& mousePos, const sf::Event& event)
 {
-    
+     
     if (isHovered(mousePos)) {
         
         if (event.is<sf::Event::MouseButtonPressed>()) {

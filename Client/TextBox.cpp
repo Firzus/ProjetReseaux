@@ -1,6 +1,9 @@
 #include "TextBox.h"
+#include "TextMessage.h"
 
-TextBox::TextBox(sf::Vector2f position, sf::Vector2f size, sf::Font& font, const std::string& initialText) : m_text(font)
+TextBox::TextBox(sf::Vector2f position, sf::Vector2f size, sf::Font& font, TextMessage& textMessage,
+    const std::string& initialText, CharType charType)
+    : m_text(font), m_textMessage(textMessage), m_charType(charType)
 {
     m_box.setSize(size);
     m_box.setPosition(position);
@@ -14,7 +17,7 @@ TextBox::TextBox(sf::Vector2f position, sf::Vector2f size, sf::Font& font, const
     m_text.setFillColor(sf::Color::Black);
     m_text.setPosition(position);
 
-    updateColor(); // Appliquer la couleur de base
+    updateColor();
 }
 
 void TextBox::handleEvent(const sf::Event& event, const sf::Vector2f& mousePos)
@@ -31,43 +34,58 @@ void TextBox::handleEvent(const sf::Event& event, const sf::Vector2f& mousePos)
         updateColor();
     }
 
-    if (m_state == State::Focused && event.is<sf::Event::TextEntered>()) 
+    if (m_state == State::Focused && event.is<sf::Event::TextEntered>())
     {
-        if (!hasFocused)
-        {
+        if (!hasFocused) {
             m_text.setString("");
             hasFocused = true;
         }
         char enteredChar = static_cast<char>(event.getIf<sf::Event::TextEntered>()->unicode);
         std::string str = m_text.getString();
 
-            if (enteredChar == 8) { // Backspace
+        if (enteredChar == 8) { // Backspace
             if (!str.empty()) {
                 str.pop_back();
                 m_text.setString(str);
             }
         }
-        if (enteredChar == 13) { // Enter
-            if (!str.empty()) 
+        else if (enteredChar == 13) { // Enter
+            if (!str.empty())
             {
                 m_stockedtext = str;
                 std::cout << getText() << std::endl;
                 m_text.setString(m_stringtext);
                 hasFocused = false;
 
-                if (m_callback) 
+                if (m_callback)
                 {
                     m_callback();
-                    
                 }
+
+                m_textMessage.SetString(m_stockedtext);  // Mettre à jour TextMessage
             }
         }
-        else if (enteredChar >= 32 && enteredChar <= 126) 
-        { // Lettres, chiffres et symboles
-            str += enteredChar;
-            m_text.setString(str);
-            
+        else if (enteredChar >= 32 && enteredChar <= 126 && str.size() < maxChar)
+        {
+            if (isValidChar(enteredChar)) {  // Vérification avec `isValidChar()`
+                str += enteredChar;
+                m_text.setString(str);
+            }
         }
+    }
+}
+
+bool TextBox::isValidChar(char enteredChar)
+{
+    switch (m_charType) {
+    case CharType::Letter:
+        return std::isalpha(enteredChar);  // Autoriser uniquement les lettres
+    case CharType::Number:
+        return std::isdigit(enteredChar);  // Autoriser uniquement les chiffres
+    case CharType::IPAddress:
+        return (std::isdigit(enteredChar) || enteredChar == '.');  // Chiffres et points
+    default:
+        return false;
     }
 }
 

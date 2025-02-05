@@ -15,5 +15,10 @@ void TextMessage::Draw(sf::RenderWindow& window)
 
 void TextMessage::Update()
 {
+    
+}
 
+void TextMessage::SetString(const std::string& newText)
+{
+    m_text.setString(newText);  // Permet de modifier directement le texte
 }

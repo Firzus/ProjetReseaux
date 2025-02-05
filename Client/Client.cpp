@@ -97,65 +97,57 @@ int main() {
 
 
     //UI
-    TextMessage text("Client SFML : Connecté au serveur sur le port 3000", sf::Color::White, sf::Vector2f{ 50.f, 50.f }, font);
-    TextMessage text2("État du client: Connecté", sf::Color::White, sf::Vector2f{ 50.f, 200.f }, font);
-    TextMessage text3("", sf::Color::Green, sf::Vector2f{ 50.f, 150.f }, font);
-    Button myButton("Host", { 100, 500 }, { 200, 50 }, font);
-    Button myButton2("Client", { 400, 500 }, { 200, 50 }, font);
-    TextBox textbox({ 100, 150 }, { 300, 50 }, font, "Pseudo");
-    TextBox textbox2({ 100, 200 }, { 300, 50 }, font, "Adresse IP");
-    
+    TextMessage title("Multijoueur Pong", sf::Color::White, { 100, 20 }, font);
+    TextMessage textIp("Adresse IP", sf::Color::White, { 100, 60 }, font);
+    TextBox boxIp({ 100, 100 }, { 400, 60 }, font, textIp,"Saisissez Adresse IP...", TextBox::CharType::IPAddress);
+    TextMessage textpseudo("Pseudo", sf::Color::White, { 100, 160 }, font);
+    TextBox boxpseudo({ 100, 200 }, { 400, 60 }, font, textpseudo, "Saisissez un pseudo...", TextBox::CharType::Letter);
+    Button buttoncreate("Rejoindre", { 100, 280 }, { 180, 60 }, font);
+    Button buttonjoin("", { 100, 360 }, { 180, 60 }, font);
+    TextMessage texterror("Message erreur:", sf::Color::Red, { 100, 500 }, font);
 
     // Définition du callback
-    myButton.setCallback([]() 
+    /*myButton.setCallback([]()
         {
         std::cout << "Button clicked!" << std::endl;
-        });
-    myButton2.setCallback([]() {
-        std::cout << "Button clicked!" << std::endl;
-        });
-    textbox.setCallback([]() 
-        {
-        std::cout << "Text Entered" << std::endl;
-        });
-    textbox2.setCallback([]() 
-        {
-        std::cout << "Text Entered" << std::endl;
-        });
+        });*/
 
     // Boucle principale de la fenêtre SFML
     while (window.isOpen() && running) {         
-
+        
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
                 running = false;
             }
-
-            // Gestion du clic sur le bouton
             
             sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-            
-            myButton.update(mousePos, *event);
-            myButton2.update(mousePos, *event);
-            textbox.handleEvent(*event, mousePos);
-            textbox2.handleEvent(*event, mousePos);
-            text.Update();
-            text2.Update();
-        }
-        sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-        textbox.updateState(mousePos);
-        textbox2.updateState(mousePos);
 
+            //Inputs
+            boxIp.handleEvent(*event, mousePos);
+            boxpseudo.handleEvent(*event, mousePos);
+            buttoncreate.update(mousePos, *event);
+            buttonjoin.update(mousePos, *event);
+        }
+        
+        //Update
+        sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        boxIp.updateState(mousePos);
+        boxpseudo.updateState(mousePos);
 
         window.clear(sf::Color::Black);
-        text.Draw(window);
-        text2.Update();
-        myButton.draw(window);
-        myButton2.draw(window);
-        textbox.draw(window);
-        textbox2.draw(window);
+        
+        //Draw
+        title.Draw(window);
+        textIp.Draw(window);
+        boxIp.draw(window);
+        textpseudo.Draw(window);
+        boxpseudo.draw(window);
+        buttoncreate.draw(window);
+        buttonjoin.draw(window);
+        texterror.Draw(window);
+
         window.display();
     }
 
