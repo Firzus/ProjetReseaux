@@ -81,7 +81,7 @@ int main() {
                     running = false;
                 }
 
-                game.GetInput().InputHandler(*event, game.GetWindow());
+                game.SetInputHandle(*event, game.GetWindow());
             }
 
             game.Update(running);

@@ -1,18 +1,6 @@
 #include "Game.h"
 
 Game::Game() :
-    posRaquettesLeftX(50.0f),
-    posRaquettesLeftY(WIN_HEIGHT / 2),
-    posRaquettesRightX(WIN_WIDTH - 70),
-    posRaquettesRightY(posRaquettesLeftY),
-    raquettespeed(0.07f),
-    raquettesHeight(150.0f),
-    raquettesWidth(20.0f),
-    ballRadius(15),
-    ballSpeed(0.03f),
-    ballDir(sf::Vector2f(2.0f, 0.5f)),
-    ballPosX(WIN_WIDTH / 2),
-    ballPosY(WIN_HEIGHT / 2),
     scoreJ1(0),
     scoreJ2(0),
     window(sf::VideoMode({ WIN_WIDTH, WIN_HEIGHT }), "Client SFML - Communication Réseau"),
@@ -36,91 +24,48 @@ void Game::Initialize()
     text_ScoreJ1.setString(std::to_string(scoreJ1));
     text_ScoreJ1.setCharacterSize(50);
     text_ScoreJ1.setFillColor(sf::Color::White);
-    text_ScoreJ1.setPosition({ (WIN_WIDTH / 2) - 50 - 35, 10 });
+    text_ScoreJ1.setPosition({ (WIN_WIDTH / 2.0f) - 50 - 35, 10 });
     // Score J2
     text_ScoreJ2.setFont(font);
     text_ScoreJ2.setString(std::to_string(scoreJ2));
     text_ScoreJ2.setCharacterSize(50);
     text_ScoreJ2.setFillColor(sf::Color::White);
-    text_ScoreJ2.setPosition({ (WIN_WIDTH / 2) + 35, 10 });
+    text_ScoreJ2.setPosition({ (WIN_WIDTH / 2.0f) + 35, 10 });
 
-    // Préparation des formes
-    // Balle
-    circleShape.setRadius(ballRadius);
-    circleShape.setPosition(sf::Vector2f(ballPosX, ballPosY));
 
-    // Raquette gauche
-    rectangleshape_J1.setSize(sf::Vector2f(raquettesWidth, raquettesHeight));
-    rectangleshape_J1.setPosition(sf::Vector2f(posRaquettesLeftX, posRaquettesLeftY));
 
-    // Raquette droite
-    rectangleshape_J2.setSize(sf::Vector2f(raquettesWidth, raquettesHeight));
-    rectangleshape_J2.setPosition(sf::Vector2f(posRaquettesRightX, posRaquettesRightY));
+    m_GameManager.AddEntity(new Raquette);
+    m_GameManager.AddEntity(new Raquette);
+    m_GameManager.AddEntity(new Ball);
 
-    // Trait du millieu
-    rectangleshape_TraitMillieu.setSize(sf::Vector2f(7, WIN_HEIGHT));
-    rectangleshape_TraitMillieu.setPosition(sf::Vector2f((WIN_WIDTH / 2) - 7, 0));
+    m_GameManager.Initialise(WIN_HEIGHT,WIN_WIDTH);
+
 }
 
 void Game::Update(bool running)
 {
-        // Gestion clavier
-        CheckBtn();
-
-        // Gestion des shapes des raquettes, balle
-        rectangleshape_J1.setPosition(sf::Vector2f(posRaquettesLeftX, posRaquettesLeftY));
-        rectangleshape_J2.setPosition(sf::Vector2f(posRaquettesRightX, posRaquettesRightY));
-        circleShape.setPosition(sf::Vector2f(ballPosX, ballPosY));
-
-        // Gestion de la balle
-        UpdateBall();
+        m_GameManager.Update(WIN_HEIGHT,WIN_WIDTH);
 
         // Texte du score
         text_ScoreJ1.setString(std::to_string(scoreJ1));
         text_ScoreJ2.setString(std::to_string(scoreJ2));
 
         window.clear(sf::Color::Black);
+
+        m_GameManager.Draw(window);
+
         window.draw(text_ScoreJ1);
         window.draw(text_ScoreJ2);
-        window.draw(circleShape);
-        window.draw(rectangleshape_J1);
-        window.draw(rectangleshape_J2);
-        window.draw(rectangleshape_TraitMillieu);
         window.display();
 }
 
-void Game::CheckBtn()
+void Game::SetInputHandle(const sf::Event& event, sf::RenderWindow& window)
 {
-    // Raquette gauche
-    if (input.GetButton().Z)
-    {
-        posRaquettesLeftY -= raquettespeed;
-        if (posRaquettesLeftY < 0)
-            posRaquettesLeftY = 0;
-    }
-    if (input.GetButton().S)
-    {
-        posRaquettesLeftY += raquettespeed;
-        if (posRaquettesLeftY + raquettesHeight > WIN_HEIGHT)
-            posRaquettesLeftY = WIN_HEIGHT - raquettesHeight;
-    }
-
-    // Raquette droit
-    if (input.GetButton().up)
-    {
-        posRaquettesRightY -= raquettespeed;
-        if (posRaquettesRightY < 0)
-            posRaquettesRightY = 0;
-    }
-    if (input.GetButton().down)
-    {
-        posRaquettesRightY += raquettespeed;
-        if (posRaquettesRightY + raquettesHeight > WIN_HEIGHT)
-            posRaquettesRightY = WIN_HEIGHT - raquettesHeight;
-    }
+    input.InputHandler(event, window);
+    m_GameManager.SetInput(input);
 }
 
-void Game::UpdateBall()
+/*void Game::UpdateBall()
 {
     // Position de la balle
     ballPosX += ballDir.x * ballSpeed;
@@ -165,6 +110,7 @@ void Game::UpdateBall()
     }
 
 }
+*/
 
 sf::RenderWindow& Game::GetWindow()
 {

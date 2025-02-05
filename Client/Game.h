@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cstring>
+#include "GameManager.h"
 #include "input.h"
 #include <SFML/Graphics.hpp>
 
@@ -19,14 +20,13 @@ public :
 
 	void Initialize();
 	void Update(bool running);
-
-	void CheckBtn();
-	void UpdateBall();
+	void SetInputHandle(const sf::Event& event, sf::RenderWindow& window);
 
 	sf::RenderWindow& GetWindow();
 	Input& GetInput();
 
 private :
+
 	sf::RenderWindow window;
 	Input input;
 	sf::Font font;
@@ -34,30 +34,7 @@ private :
 	sf::Text text_ScoreJ1;
 	sf::Text text_ScoreJ2;
 
-	sf::CircleShape circleShape;
-	sf::RectangleShape rectangleshape_J1;
-	sf::RectangleShape rectangleshape_J2;
-	sf::RectangleShape rectangleshape_TraitMillieu;
-
-	// Pos raquettes Left
-	float posRaquettesLeftX;
-	float posRaquettesLeftY;
-
-	// Pos raquettes Right
-	float posRaquettesRightX;
-	float posRaquettesRightY;
-
-	// Raquettes parameters
-	float raquettespeed;
-	float raquettesHeight;
-	float raquettesWidth;
-
-	// Info Balle
-	float ballRadius;
-	float ballSpeed;
-	sf::Vector2f ballDir;
-	float ballPosX;
-	float ballPosY = WIN_HEIGHT / 2;
+	GameManager m_GameManager;
 
 	// Score
 	int scoreJ1;
