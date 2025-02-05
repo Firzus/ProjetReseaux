@@ -99,12 +99,14 @@ int main() {
     //UI
     TextMessage title("Multijoueur Pong", sf::Color::White, { 100, 20 }, font);
     TextMessage textIp("Adresse IP", sf::Color::White, { 100, 60 }, font);
-    TextBox boxIp({ 100, 100 }, { 400, 60 }, font, textIp,"Saisissez Adresse IP...", TextBox::CharType::IPAddress);
+    TextMessage textconfirmedIp("", sf::Color::White, { 100, 500 }, font);
+    TextMessage textconfirmedpseudo("", sf::Color::White, { 100, 540 }, font);
+    TextBox boxIp({ 100, 100 }, { 400, 60 }, font, textconfirmedIp, "Saisissez Adresse IP...", TextBox::CharType::IPAddress);
     TextMessage textpseudo("Pseudo", sf::Color::White, { 100, 160 }, font);
-    TextBox boxpseudo({ 100, 200 }, { 400, 60 }, font, textpseudo, "Saisissez un pseudo...", TextBox::CharType::Letter);
-    Button buttoncreate("Rejoindre", { 100, 280 }, { 180, 60 }, font);
-    Button buttonjoin("", { 100, 360 }, { 180, 60 }, font);
-    TextMessage texterror("Message erreur:", sf::Color::Red, { 100, 500 }, font);
+    TextBox boxpseudo({ 100, 200 }, { 400, 60 }, font, textconfirmedpseudo, "Saisissez un pseudo...", TextBox::CharType::Letter);
+    Button buttoncreate("Creer partie", { 100, 280 }, { 180, 60 }, font);
+    Button buttonjoin("Joindre partie", { 100, 360 }, { 180, 60 }, font);
+    TextMessage texterror("Message erreur:", sf::Color::Red, { 100, 440 }, font);
 
     // Définition du callback
     /*myButton.setCallback([]()
@@ -112,16 +114,16 @@ int main() {
         std::cout << "Button clicked!" << std::endl;
         });*/
 
-    // Boucle principale de la fenêtre SFML
-    while (window.isOpen() && running) {         
-        
+        // Boucle principale de la fenêtre SFML
+    while (window.isOpen() && running) {
+
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
                 running = false;
             }
-            
+
             sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
             //Inputs
@@ -130,20 +132,22 @@ int main() {
             buttoncreate.update(mousePos, *event);
             buttonjoin.update(mousePos, *event);
         }
-        
+
         //Update
         sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
         boxIp.updateState(mousePos);
         boxpseudo.updateState(mousePos);
 
         window.clear(sf::Color::Black);
-        
+
         //Draw
         title.Draw(window);
         textIp.Draw(window);
         boxIp.draw(window);
         textpseudo.Draw(window);
         boxpseudo.draw(window);
+        textconfirmedIp.Draw(window);
+        textconfirmedpseudo.Draw(window);
         buttoncreate.draw(window);
         buttonjoin.draw(window);
         texterror.Draw(window);
