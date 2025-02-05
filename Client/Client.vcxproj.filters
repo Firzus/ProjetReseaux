@@ -27,8 +27,8 @@
     <ClCompile Include="TextBox.cpp">
       <Filter>Fichiers sources\UI</Filter>
     </ClCompile>
-    <ClCompile Include="TextEntry.cpp">
-      <Filter>Fichiers sources\UI</Filter>
+    <ClCompile Include="TextMessage.cpp">
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -38,8 +38,8 @@
     <ClInclude Include="TextBox.h">
       <Filter>Fichiers sources\UI</Filter>
     </ClInclude>
-    <ClInclude Include="TextEntry.h">
-      <Filter>Fichiers sources\UI</Filter>
+    <ClInclude Include="TextMessage.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

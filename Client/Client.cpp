@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include "Button.h"
 #include "TextBox.h"
+#include "TextMessage.h"
 
 #pragma comment(lib, "ws2_32.lib") // Lier la bibliothèque Winsock
 
@@ -94,26 +95,37 @@ int main() {
         std::cerr << "Erreur de chargement de la police." << std::endl;
     }
 
-    // Configuration du texte à afficher
-    sf::Text text(font);
-    text.setString("Client SFML : Connecté au serveur sur le port 3000");
-    text.setCharacterSize(24);
-    text.setFillColor(sf::Color::White);
-    text.setPosition({ 50.f, 50.f });
 
     //UI
+    TextMessage text("Client SFML : Connecté au serveur sur le port 3000", sf::Color::White, sf::Vector2f{ 50.f, 50.f }, font);
+    TextMessage text2("État du client: Connecté", sf::Color::White, sf::Vector2f{ 50.f, 200.f }, font);
+    TextMessage text3("", sf::Color::Green, sf::Vector2f{ 50.f, 150.f }, font);
     Button myButton("Host", { 100, 500 }, { 200, 50 }, font);
     Button myButton2("Client", { 400, 500 }, { 200, 50 }, font);
-    TextBox textbox({ 100, 150 }, { 300, 50 }, font, "Pseudo: ");
-    TextBox textbox2({ 100, 200 }, { 300, 50 }, font, "Adresse IP: ");
+    TextBox textbox({ 100, 150 }, { 300, 50 }, font, "Pseudo");
+    TextBox textbox2({ 100, 200 }, { 300, 50 }, font, "Adresse IP");
+    
 
     // Définition du callback
-    myButton.setCallback([]() {
+    myButton.setCallback([]() 
+        {
         std::cout << "Button clicked!" << std::endl;
+        });
+    myButton2.setCallback([]() {
+        std::cout << "Button clicked!" << std::endl;
+        });
+    textbox.setCallback([]() 
+        {
+        std::cout << "Text Entered" << std::endl;
+        });
+    textbox2.setCallback([]() 
+        {
+        std::cout << "Text Entered" << std::endl;
         });
 
     // Boucle principale de la fenêtre SFML
-    while (window.isOpen() && running) {
+    while (window.isOpen() && running) {         
+
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>()) {
@@ -129,6 +141,8 @@ int main() {
             myButton2.update(mousePos, *event);
             textbox.handleEvent(*event, mousePos);
             textbox2.handleEvent(*event, mousePos);
+            text.Update();
+            text2.Update();
         }
         sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
         textbox.updateState(mousePos);
@@ -136,7 +150,8 @@ int main() {
 
 
         window.clear(sf::Color::Black);
-        window.draw(text);
+        text.Draw(window);
+        text2.Update();
         myButton.draw(window);
         myButton2.draw(window);
         textbox.draw(window);

@@ -15,14 +15,21 @@ Button::Button(const std::string& text, sf::Vector2f position, sf::Vector2f size
 
 void Button::update(const sf::Vector2f& mousePos, const sf::Event& event)
 {
+    
     if (isHovered(mousePos)) {
-        m_state = State::Hovered;
-        if (event.is<sf::Event::MouseButtonPressed>() && event.is<sf::Event::MouseLeft>()) {
+        
+        if (event.is<sf::Event::MouseButtonPressed>()) {
             m_state = State::Pressed;
             if (m_callback) {
                 m_callback();
             }
         }
+        else
+        {
+            m_state = State::Hovered;
+        }
+
+        
     }
     else {
         m_state = State::Normal;

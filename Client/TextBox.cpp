@@ -8,7 +8,8 @@ TextBox::TextBox(sf::Vector2f position, sf::Vector2f size, sf::Font& font, const
     m_box.setOutlineThickness(2);
 
     m_text.setFont(font);
-    m_text.setString(initialText);
+    m_stringtext = initialText;
+    m_text.setString(m_stringtext);
     m_text.setCharacterSize(20);
     m_text.setFillColor(sf::Color::Black);
     m_text.setPosition(position);
@@ -24,24 +25,48 @@ void TextBox::handleEvent(const sf::Event& event, const sf::Vector2f& mousePos)
         }
         else {
             m_state = State::Normal;
+            m_text.setString(m_stringtext);
+            hasFocused = false;
         }
         updateColor();
     }
 
-    if (m_state == State::Focused && event.is<sf::Event::TextEntered>()) {
-        
-        char enteredChar = static_cast<char>(event.is<sf::Event::TextEntered>());
+    if (m_state == State::Focused && event.is<sf::Event::TextEntered>()) 
+    {
+        if (!hasFocused)
+        {
+            m_text.setString("");
+            hasFocused = true;
+        }
+        char enteredChar = static_cast<char>(event.getIf<sf::Event::TextEntered>()->unicode);
         std::string str = m_text.getString();
 
-        if (enteredChar == 8) { // Backspace
+            if (enteredChar == 8) { // Backspace
             if (!str.empty()) {
                 str.pop_back();
                 m_text.setString(str);
             }
         }
-        else if (enteredChar >= 32 && enteredChar <= 126) { // Lettres, chiffres et symboles
+        if (enteredChar == 13) { // Enter
+            if (!str.empty()) 
+            {
+                m_stockedtext = str;
+                std::cout << getText() << std::endl;
+                m_text.setString(m_stringtext);
+                hasFocused = false;
+
+                if (m_callback) 
+                {
+                    m_callback();
+                    
+                }
+            }
+        }
+        else if (enteredChar >= 32 && enteredChar <= 126) 
+        { // Lettres, chiffres et symboles
             str += enteredChar;
             m_text.setString(str);
+            
         }
     }
 }
@@ -77,5 +102,5 @@ void TextBox::draw(sf::RenderWindow& window)
 
 std::string TextBox::getText() const
 {
-    return m_text.getString();
+    return m_stockedtext;
 }
