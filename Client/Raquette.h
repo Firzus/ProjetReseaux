@@ -22,6 +22,7 @@ public :
 	// Getter
 	int GetPlayerIndex();
 	float GetRaquetteSpeed();
+	float GetRaquetteHeight();
 
 private : 
 

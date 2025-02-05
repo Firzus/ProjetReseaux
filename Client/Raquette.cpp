@@ -53,3 +53,8 @@ float Raquette::GetRaquetteSpeed()
 {
 	return m_RaquetteSpeed;
 }
+
+float Raquette::GetRaquetteHeight()
+{
+	return m_RaquettesHeight;
+}

@@ -41,6 +41,10 @@ void GameManager::Update(float WindowHeight, float WindowWidth)
 {
     for (size_t i = 0; i < m_Entitties.size(); i++)
     {
+        if (dynamic_cast<Ball*>(m_Entitties[i])) 
+        {
+            dynamic_cast<Ball*>(m_Entitties[i])->CheckCollisionRaquette(m_Raquettes);
+        }
         m_Entitties[i]->Update(WindowHeight, WindowWidth);
     }
     CheckBtn(WindowHeight,WindowWidth);

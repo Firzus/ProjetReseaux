@@ -43,3 +43,14 @@ void Ball::CheckCollision(sf::Vector2f velocity, float WindowHeight, float Windo
 		m_ballDir.x *= -1.0f;
 	}
 }
+
+void Ball::CheckCollisionRaquette(std::vector<Raquette*> Raquettes)
+{
+	for (size_t i = 0; i < Raquettes.size(); i++)
+	{
+		if (GetEntityLocation().y + GetVelocity().y <= (Raquettes[i]->GetEntityLocation().y + Raquettes[i]->) || GetEntityLocation().y + GetVelocity().y)
+		{
+			m_ballDir.y *= -1.0f;
+		}
+	}
+}

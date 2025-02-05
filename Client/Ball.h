@@ -2,7 +2,8 @@
 #define BALL_H
 
 #include "Entity.h"
-#include <vect>
+#include "Raquette.h"
+#include <vector>
 #include "SFML/Graphics.hpp"
 
 class Ball : public Entity
@@ -15,8 +16,9 @@ public :
 	void Update(float WindowHeight, float WindowWidth) override;
 	void Draw(sf::RenderWindow& window) override;
 	void Initialize(float WindowHeight, float WindowWidth) override;
-
 	void CheckCollision(sf::Vector2f velocity, float WindowHeight = 0, float WindowWidth = 0) override;
+
+	void CheckCollisionRaquette(std::vector<Raquette*> Raquettes);
 
 private :
 
