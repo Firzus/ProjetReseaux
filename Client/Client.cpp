@@ -1,12 +1,4 @@
-// Client.cpp
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <iostream>
-#include <thread>
-#include <cstring>
-#include <SFML/Graphics.hpp>
-
-#pragma comment(lib, "ws2_32.lib") // Lier la bibliothèque Winsock
+#include "client.h"
 
 // Variable globale pour contrôler la boucle d'exécution
 bool running = true;
@@ -35,93 +27,92 @@ void networkListener(SOCKET sock) {
     }
 }
 
+// Variable Game
+Game game;
+
 int main() {
     // Initialisation de Winsock
     WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        std::cerr << "Erreur WSAStartup" << std::endl;
-        return 1;
-    }
-
-    // Création du socket TCP/IP
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (sock == INVALID_SOCKET) {
-        std::cerr << "Erreur de création du socket : " << WSAGetLastError() << std::endl;
-        WSACleanup();
-        return 1;
-    }
-
-    // Configuration de l'adresse du serveur
-    sockaddr_in serverAddr;
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(3000);  // Port 3000
-    if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
-        std::cerr << "Adresse IP invalide" << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return 1;
-    }
-
-    // Connexion au serveur
-    if (connect(sock, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
-        std::cerr << "Erreur de connexion : " << WSAGetLastError() << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return 1;
-    }
-
-    std::cout << "Connecté au serveur." << std::endl;
-
-    // Envoi d'un message au serveur
-    const char* message = "Hello from SFML client!";
-    if (send(sock, message, static_cast<int>(strlen(message)), 0) == SOCKET_ERROR) {
-        std::cerr << "Erreur lors de l'envoi du message : " << WSAGetLastError() << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return 1;
-    }
-
-    // Lancement d'un thread pour écouter les messages du serveur
-    std::thread networkThread(networkListener, sock);
-
-    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Client SFML - Communication Réseau");
-
-    // Chargement d'une police pour afficher un texte
-    sf::Font font;
-    if (!font.openFromFile("resources/font/Roboto.ttf")) {
-        std::cerr << "Erreur de chargement de la police." << std::endl;
-    }
-
-    // Configuration du texte à afficher
-    sf::Text text(font);
-    text.setString("Client SFML : Connecté au serveur sur le port 3000");
-    text.setCharacterSize(24);
-    text.setFillColor(sf::Color::White);
-    text.setPosition({ 50.f, 50.f });
-
-    // Boucle principale de la fenêtre SFML
-    while (window.isOpen() && running) {
-        while (const std::optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>()) {
-                window.close();
-                running = false;
-            }
+    try {
+        if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+            throw std::runtime_error("Erreur WSAStartup");
         }
 
-        window.clear(sf::Color::Black);
-        window.draw(text);
-        window.display();
+        // Création du socket TCP/IP
+        SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (sock == INVALID_SOCKET) {
+            throw std::runtime_error("Erreur de création du socket : " + std::to_string(WSAGetLastError()));
+        }
+
+        // Configuration de l'adresse du serveur
+        sockaddr_in serverAddr;
+        serverAddr.sin_family = AF_INET;
+        serverAddr.sin_port = htons(3000);  // Port 3000
+        if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
+            throw std::runtime_error("Adresse IP invalide");
+        }
+
+        // Connexion au serveur
+        if (connect(sock, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
+            throw std::runtime_error("Erreur de connexion : " + std::to_string(WSAGetLastError()));
+        }
+
+        std::cout << "Connecté au serveur." << std::endl;
+
+        // Envoi d'un message au serveur
+        const char* message = "Hello from SFML client!";
+        if (send(sock, message, static_cast<int>(strlen(message)), 0) == SOCKET_ERROR) {
+            throw std::runtime_error("Erreur lors de l'envoi du message : " + std::to_string(WSAGetLastError()));
+        }
+
+        // Lancement d'un thread pour écouter les messages du serveur
+        std::thread networkThread(networkListener, sock);
+
+        // Initialize les élément a afficher
+        game.Initialize();
+
+        // Boucle principale de la fenêtre SFML
+        while (game.GetWindow().isOpen() && running) {
+
+            while (const std::optional<sf::Event> event = game.GetWindow().pollEvent())
+            {
+                if (event->is<sf::Event::Closed>()) {
+                    game.GetWindow().close();
+                    running = false;
+                }
+
+                game.SetInputHandle(*event, game.GetWindow());
+            }
+
+            game.Update(running);
+
+        }
+
+        // Arrêt de l'écoute réseau
+        running = false;
+        if (networkThread.joinable())
+            networkThread.join();
+
+        // Fermeture du socket et nettoyage de Winsock
+        closesocket(sock);
+        WSACleanup();
+
     }
-
-    // Arrêt de l'écoute réseau
-    running = false;
-    if (networkThread.joinable())
-        networkThread.join();
-
-    // Fermeture du socket et nettoyage de Winsock
-    closesocket(sock);
-    WSACleanup();
+    catch (const std::runtime_error& e) {
+        std::cerr << "Exception standard: " << e.what() << std::endl;
+        running = false;
+        WSACleanup();
+    }
+    catch (const sf::Exception& e) {
+        std::cerr << "Exception SFML: " << e.what() << std::endl;
+        running = false;
+        WSACleanup();
+    }
+    catch (...) {
+        std::cerr << "Une erreur inconnue est survenue." << std::endl;
+        running = false;
+        WSACleanup();
+    }
 
     return 0;
 }
