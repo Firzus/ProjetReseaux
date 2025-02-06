@@ -22,13 +22,16 @@ TextBox::TextBox(sf::Vector2f position, sf::Vector2f size, sf::Font& font, TextM
 
 void TextBox::handleEvent(const sf::Event& event, const sf::Vector2f& mousePos)
 {
+
+    std::string str = m_text.getString();
+
     if (event.is<sf::Event::MouseButtonPressed>()) {
         if (m_box.getGlobalBounds().contains(mousePos)) {
             m_state = State::Focused;
         }
         else {
             m_state = State::Normal;
-            m_text.setString(m_stringtext);
+            m_text.setString(str);
             hasFocused = false;
         }
         updateColor();
@@ -41,7 +44,7 @@ void TextBox::handleEvent(const sf::Event& event, const sf::Vector2f& mousePos)
             hasFocused = true;
         }
         char enteredChar = static_cast<char>(event.getIf<sf::Event::TextEntered>()->unicode);
-        std::string str = m_text.getString();
+        
 
         if (enteredChar == 8) { // Backspace
             if (!str.empty()) {
@@ -54,7 +57,6 @@ void TextBox::handleEvent(const sf::Event& event, const sf::Vector2f& mousePos)
             {
                 m_stockedtext = str;
                 std::cout << getText() << std::endl;
-                m_text.setString(m_stringtext);
                 hasFocused = false;
 
                 if (m_callback)

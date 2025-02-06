@@ -20,9 +20,9 @@ void handleClient(SOCKET clientSocket) {
             break;
         }
 
-        std::cout << "Message reçu : " << buffer << std::endl;
+        std::cout << "Message reçu du client : " << buffer << std::endl;
 
-        // Par exemple, renvoyer une réponse au client
+        // Répondre au client
         const char* reply = "Message reçu!";
         send(clientSocket, reply, static_cast<int>(strlen(reply)), 0);
     }
@@ -68,7 +68,7 @@ int main() {
         return 1;
     }
 
-    std::cout << "Serveur multi-client en écoute sur le port 3000..." << std::endl;
+    std::cout << "Serveur en écoute sur le port 3000..." << std::endl;
 
     // Vector pour stocker les threads créés (facultatif, pour pouvoir les rejoindre plus tard)
     std::vector<std::thread> threads;

@@ -1,4 +1,3 @@
-// Client.cpp
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iostream>
@@ -8,6 +7,7 @@
 #include "Button.h"
 #include "TextBox.h"
 #include "TextMessage.h"
+#include <regex>
 
 #pragma comment(lib, "ws2_32.lib") // Lier la bibliothèque Winsock
 
@@ -36,6 +36,19 @@ void networkListener(SOCKET sock) {
             break;
         }
     }
+}
+
+// Fonction pour envoyer un message au serveur
+void sendMessageToServer(SOCKET sock, const std::string& message) {
+    if (send(sock, message.c_str(), static_cast<int>(message.length()), 0) == SOCKET_ERROR) {
+        std::cerr << "Erreur lors de l'envoi du message : " << WSAGetLastError() << std::endl;
+    }
+}
+
+// Fonction de validation de l'IP
+bool isValidIp(const std::string& ip) {
+    std::regex ipPattern("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+    return std::regex_match(ip, ipPattern);
 }
 
 int main() {
@@ -75,15 +88,6 @@ int main() {
 
     std::cout << "Connecté au serveur." << std::endl;
 
-    // Envoi d'un message au serveur
-    const char* message = "Hello from SFML client!";
-    if (send(sock, message, static_cast<int>(strlen(message)), 0) == SOCKET_ERROR) {
-        std::cerr << "Erreur lors de l'envoi du message : " << WSAGetLastError() << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return 1;
-    }
-
     // Lancement d'un thread pour écouter les messages du serveur
     std::thread networkThread(networkListener, sock);
 
@@ -95,30 +99,50 @@ int main() {
         std::cerr << "Erreur de chargement de la police." << std::endl;
     }
 
-
-    //UI
+    // UI
     TextMessage title("Multijoueur Pong", sf::Color::White, { 100, 20 }, font);
     TextMessage textIp("Adresse IP", sf::Color::White, { 100, 60 }, font);
-    TextMessage textconfirmedIp("", sf::Color::White, { 100, 500 }, font);
-    TextMessage textconfirmedpseudo("", sf::Color::White, { 100, 540 }, font);
+    TextMessage textconfirmedIp("", sf::Color::Green, { 100, 500 }, font);
+    TextMessage textconfirmedpseudo("", sf::Color::Green, { 100, 540 }, font);
     TextBox boxIp({ 100, 100 }, { 400, 60 }, font, textconfirmedIp, "Saisissez Adresse IP...", TextBox::CharType::IPAddress);
     TextMessage textpseudo("Pseudo", sf::Color::White, { 100, 160 }, font);
     TextBox boxpseudo({ 100, 200 }, { 400, 60 }, font, textconfirmedpseudo, "Saisissez un pseudo...", TextBox::CharType::Letter);
-    Button buttoncreate("Creer partie", { 100, 280 }, { 180, 60 }, font);
+    Button buttoncreate("Créer partie", { 100, 280 }, { 180, 60 }, font);
     Button buttonjoin("Joindre partie", { 100, 360 }, { 180, 60 }, font);
-    TextMessage texterror("Message erreur:", sf::Color::Red, { 100, 440 }, font);
+    TextMessage texterror("", sf::Color::Red, { 100, 440 }, font);
 
-    // Définition du callback
-    /*myButton.setCallback([]()
-        {
-        std::cout << "Button clicked!" << std::endl;
-        });*/
+    // Définir les actions des boutons
+    buttoncreate.setCallback([&]() {
+        std::string ip = boxIp.getText();
+        std::string pseudo = boxpseudo.getText();
+        std::cout << isValidIp(ip) << std::endl;
+        if (isValidIp(ip) && !pseudo.empty()) {
+            // Créer une partie et envoyer l'IP et le pseudo
+            sendMessageToServer(sock, "CREATE_PARTY " + ip + " " + pseudo);
+            textconfirmedIp.SetString("Partie créée.");
+        }
+        else {
+            texterror.SetString("Adresse IP ou pseudo invalide.");
+        }
+        });
 
-        // Boucle principale de la fenêtre SFML
+    buttonjoin.setCallback([&]() {
+        std::string ip = boxIp.getText();
+        std::string pseudo = boxpseudo.getText();
+
+        if (isValidIp(ip) && !pseudo.empty()) {
+            // Rejoindre une partie
+            sendMessageToServer(sock, "JOIN_PARTY " + ip + " " + pseudo);
+            textconfirmedIp.SetString("Connexion au serveur...");
+        }
+        else {
+            texterror.SetString("Adresse IP ou pseudo invalide.");
+        }
+        });
+
+    // Boucle principale de la fenêtre SFML
     while (window.isOpen() && running) {
-
-        while (const std::optional event = window.pollEvent())
-        {
+        while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
                 running = false;
@@ -126,21 +150,21 @@ int main() {
 
             sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-            //Inputs
+            // Inputs
             boxIp.handleEvent(*event, mousePos);
             boxpseudo.handleEvent(*event, mousePos);
             buttoncreate.update(mousePos, *event);
             buttonjoin.update(mousePos, *event);
         }
 
-        //Update
+        // Update
         sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
         boxIp.updateState(mousePos);
         boxpseudo.updateState(mousePos);
 
         window.clear(sf::Color::Black);
 
-        //Draw
+        // Draw
         title.Draw(window);
         textIp.Draw(window);
         boxIp.draw(window);
@@ -157,8 +181,9 @@ int main() {
 
     // Arrêt de l'écoute réseau
     running = false;
-    if (networkThread.joinable())
+    if (networkThread.joinable()) {
         networkThread.join();
+    }
 
     // Fermeture du socket et nettoyage de Winsock
     closesocket(sock);

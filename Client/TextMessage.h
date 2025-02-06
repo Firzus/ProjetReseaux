@@ -17,6 +17,7 @@ public:
 	std::string GetString() { return m_text.getString(); }
 	void SetString(const std::string& newtext);
 	void AddString(std::string stringtoadd) { m_text.setString(m_text.getString() + stringtoadd); }
+	void SetTextColor(sf::Color color) { m_text.setFillColor(color); }
 	void Draw(sf::RenderWindow& window);
 	void Update();
 
