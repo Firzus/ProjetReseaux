@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iostream>
@@ -10,6 +11,9 @@
 #include <regex>
 
 #pragma comment(lib, "ws2_32.lib") // Lier la bibliothèque Winsock
+=======
+#include "client.h"
+>>>>>>> main
 
 // Variable globale pour contrôler la boucle d'exécution
 bool running = true;
@@ -38,6 +42,7 @@ void networkListener(SOCKET sock) {
     }
 }
 
+<<<<<<< HEAD
 // Fonction pour envoyer un message au serveur
 void sendMessageToServer(SOCKET sock, const std::string& message) {
     if (send(sock, message.c_str(), static_cast<int>(message.length()), 0) == SOCKET_ERROR) {
@@ -50,10 +55,15 @@ bool isValidIp(const std::string& ip) {
     std::regex ipPattern("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
     return std::regex_match(ip, ipPattern);
 }
+=======
+// Variable Game
+Game game;
+>>>>>>> main
 
 int main() {
     // Initialisation de Winsock
     WSADATA wsaData;
+<<<<<<< HEAD
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         std::cerr << "Erreur WSAStartup" << std::endl;
         return 1;
@@ -188,6 +198,88 @@ int main() {
     // Fermeture du socket et nettoyage de Winsock
     closesocket(sock);
     WSACleanup();
+=======
+    try {
+        if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+            throw std::runtime_error("Erreur WSAStartup");
+        }
+
+        // Création du socket TCP/IP
+        SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (sock == INVALID_SOCKET) {
+            throw std::runtime_error("Erreur de création du socket : " + std::to_string(WSAGetLastError()));
+        }
+
+        // Configuration de l'adresse du serveur
+        sockaddr_in serverAddr;
+        serverAddr.sin_family = AF_INET;
+        serverAddr.sin_port = htons(3000);  // Port 3000
+        if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
+            throw std::runtime_error("Adresse IP invalide");
+        }
+
+        // Connexion au serveur
+        if (connect(sock, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
+            throw std::runtime_error("Erreur de connexion : " + std::to_string(WSAGetLastError()));
+        }
+
+        std::cout << "Connecté au serveur." << std::endl;
+
+        // Envoi d'un message au serveur
+        const char* message = "Hello from SFML client!";
+        if (send(sock, message, static_cast<int>(strlen(message)), 0) == SOCKET_ERROR) {
+            throw std::runtime_error("Erreur lors de l'envoi du message : " + std::to_string(WSAGetLastError()));
+        }
+
+        // Lancement d'un thread pour écouter les messages du serveur
+        std::thread networkThread(networkListener, sock);
+
+        // Initialize les élément a afficher
+        game.Initialize();
+
+        // Boucle principale de la fenêtre SFML
+        while (game.GetWindow().isOpen() && running) {
+
+            while (const std::optional<sf::Event> event = game.GetWindow().pollEvent())
+            {
+                if (event->is<sf::Event::Closed>()) {
+                    game.GetWindow().close();
+                    running = false;
+                }
+
+                game.SetInputHandle(*event, game.GetWindow());
+            }
+
+            game.Update(running);
+
+        }
+
+        // Arrêt de l'écoute réseau
+        running = false;
+        if (networkThread.joinable())
+            networkThread.join();
+
+        // Fermeture du socket et nettoyage de Winsock
+        closesocket(sock);
+        WSACleanup();
+
+    }
+    catch (const std::runtime_error& e) {
+        std::cerr << "Exception standard: " << e.what() << std::endl;
+        running = false;
+        WSACleanup();
+    }
+    catch (const sf::Exception& e) {
+        std::cerr << "Exception SFML: " << e.what() << std::endl;
+        running = false;
+        WSACleanup();
+    }
+    catch (...) {
+        std::cerr << "Une erreur inconnue est survenue." << std::endl;
+        running = false;
+        WSACleanup();
+    }
+>>>>>>> main
 
     return 0;
 }
