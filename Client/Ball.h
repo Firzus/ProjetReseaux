@@ -20,6 +20,9 @@ public :
 
 	void CheckCollisionRaquette(std::vector<Raquette*> Raquettes);
 
+	bool GetWinJ1();
+	bool GetWinJ2();
+
 private :
 
 	sf::CircleShape m_BallShape;
@@ -33,6 +36,8 @@ private :
 	float m_ballPosY;
 
 	bool m_SimulatePhysic;
+	bool m_WinJ1;
+	bool m_WinJ2;
 };
 
 #endif

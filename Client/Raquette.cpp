@@ -58,3 +58,8 @@ float Raquette::GetRaquetteHeight()
 {
 	return m_RaquettesHeight;
 }
+
+float Raquette::GetRaquetteWidth()
+{
+	return m_RaquettesWidth;
+}

@@ -44,6 +44,16 @@ void GameManager::Update(float WindowHeight, float WindowWidth)
         if (dynamic_cast<Ball*>(m_Entitties[i])) 
         {
             dynamic_cast<Ball*>(m_Entitties[i])->CheckCollisionRaquette(m_Raquettes);
+            if (dynamic_cast<Ball*>(m_Entitties[i])->GetWinJ1())
+            {
+                scoreJ1++;
+                Win(WindowHeight,WindowWidth);
+            }           
+            if (dynamic_cast<Ball*>(m_Entitties[i])->GetWinJ2())
+            {
+                scoreJ2++;
+                Win(WindowHeight, WindowWidth);
+            }
         }
         m_Entitties[i]->Update(WindowHeight, WindowWidth);
     }
@@ -53,6 +63,7 @@ void GameManager::Update(float WindowHeight, float WindowWidth)
 // Ajoute une entité au vecteur Entitties !! si l'entiter est une raquette on augmentera l'index du joueur et on l'ascosiera a la raquette !!
 void GameManager::AddEntity(Entity* entity)
 {
+
     if (dynamic_cast<Raquette*>(entity)) {
         m_PlayerIndex++;
         dynamic_cast<Raquette*>(entity)->SetPlayerIndex(m_PlayerIndex);
@@ -77,6 +88,14 @@ void GameManager::CheckBtn(float WindowHeight, float WindowWidth)
 void GameManager::SetInput(Input& input)
 {
     m_input = input;
+}
+
+void GameManager::Win(float WindowHeight, float WindowWidth)
+{
+    for (size_t i = 0; i < m_Entitties.size(); i++)
+    {
+        m_Entitties[i]->Initialize(WindowHeight, WindowWidth);
+    }
 }
 
 // retourn le vecteur d'entité

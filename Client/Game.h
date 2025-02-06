@@ -36,10 +36,6 @@ private :
 
 	GameManager m_GameManager;
 
-	// Score
-	int scoreJ1;
-	int scoreJ2;
-
 };
 
 #endif

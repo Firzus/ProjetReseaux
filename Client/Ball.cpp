@@ -28,19 +28,25 @@ void Ball::Draw(sf::RenderWindow& window)
 void Ball::Initialize(float WindowHeight, float WindowWidth)
 {
 	m_SimulatePhysic = true;
+	m_WinJ2 = false;
+	m_WinJ1 = false;
 	SetEntityLocation(sf::Vector2f(WindowHeight / 2 , WindowWidth / 2));
-	m_ballDir = sf::Vector2f(2.0f,0.7f);
+	m_ballDir = sf::Vector2f(-2.0f,0.7f);
 }
 
 void Ball::CheckCollision(sf::Vector2f velocity, float WindowHeight, float WindowWidth)
 {
-	if (GetEntityLocation().y + velocity.y <= 0 || GetEntityLocation().y + velocity.y > WindowHeight)
+	if (GetEntityLocation().y + velocity.y <= 0 || GetEntityLocation().y + m_ballRadius + velocity.y > WindowHeight)
 	{
 		m_ballDir.y *= -1.0f;
 	}
-	if (GetEntityLocation().x + velocity.x <= 0 || GetEntityLocation().x + velocity.x > WindowWidth)
+	if (GetEntityLocation().x + velocity.x <= 0)
 	{
-		m_ballDir.x *= -1.0f;
+		m_WinJ2 = true;
+	}
+	if (GetEntityLocation().x + m_ballRadius + velocity.x > WindowWidth)
+	{
+		m_WinJ1 = true;
 	}
 }
 
@@ -48,9 +54,22 @@ void Ball::CheckCollisionRaquette(std::vector<Raquette*> Raquettes)
 {
 	for (size_t i = 0; i < Raquettes.size(); i++)
 	{
-		if (GetEntityLocation().y + GetVelocity().y <= (Raquettes[i]->GetEntityLocation().y + Raquettes[i]->) || GetEntityLocation().y + GetVelocity().y)
+		if (GetEntityLocation().x + GetVelocity().x <= Raquettes[i]->GetEntityLocation().x + Raquettes[i]->GetRaquetteWidth() &&
+			GetEntityLocation().x + m_ballRadius + GetVelocity().x >= Raquettes[i]->GetEntityLocation().x &&
+			GetEntityLocation().y + GetVelocity().y <= Raquettes[i]->GetEntityLocation().y + Raquettes[i]->GetRaquetteHeight() &&
+			GetEntityLocation().y + m_ballRadius + GetVelocity().y >= Raquettes[i]->GetEntityLocation().y )
 		{
-			m_ballDir.y *= -1.0f;
+			m_ballDir.x *= -1.0f;
 		}
 	}
+}
+
+bool Ball::GetWinJ1()
+{
+	return m_WinJ1;
+}
+
+bool Ball::GetWinJ2()
+{
+	return m_WinJ2;
 }

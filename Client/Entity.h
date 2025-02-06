@@ -33,6 +33,8 @@ private :
 	sf::Vector2f m_velocity;
 
 	bool IsOffsetLock;
+
+
 };
 
 #endif

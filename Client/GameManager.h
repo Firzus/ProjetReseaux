@@ -23,6 +23,7 @@ public :
 	void AddEntity(Entity* entity);
 	void CheckBtn(float WindowHeight, float WindowWidth);
 	void SetInput(Input& input);
+	void Win(float WindowHeight, float WindowWidth);
 
 	std::vector<Entity*> GetEntitties();
 
